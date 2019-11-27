@@ -34,6 +34,8 @@ RUN DEBIAN_FRONTEND=noninteractive \
     && apt-get autoremove \
     && apt-get autoclean
     
+RUN apt-get install libzmq3-dev libcurl4-openssl-dev libssl-dev jupyter-core jupyter-client r-cran-rjava
+
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         libxml2-dev \
