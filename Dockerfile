@@ -46,8 +46,7 @@ RUN apt-get update \
     && apt-get autoremove \
     && apt-get autoclean
     
-RUN Rscript /scripts/install_rkernal.r
-RUN Rscript /scripts/install_packages.r
+RUN Rscript /scripts/install_r.r
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends wget \
