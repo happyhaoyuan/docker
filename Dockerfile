@@ -46,6 +46,7 @@ RUN apt-get update \
     && apt-get autoremove \
     && apt-get autoclean
     
+RUN Rscript /scripts/install_rkernal.r
 RUN Rscript /scripts/install_packages.r
 
 RUN apt-get update \
