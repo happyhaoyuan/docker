@@ -57,4 +57,6 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends /rstudio-server.deb \
     && rm /rstudio-server.deb 
 
+EXPOSE 8787
+
 COPY settings/Rprofile.site /usr/local/lib/R/etc/
