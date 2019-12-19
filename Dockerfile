@@ -1,100 +1,110 @@
 FROM ubuntu:19.04
 
-RUN apt-get update -y \
-#system
-    && DEBIAN_FRONTEND=noninteractive apt-get install -y \
-        sudo \
-        software-properties-common apt-transport-https \
-        zip \
-        tzdata locales \
-        bash-completion man-db \
-        neovim git \
-        rsync curl \
-#python
-    && apt-get install -y \
-        python3 python3-pip python3-venv \
-        python3-all-dev python3-setuptools build-essential python3-wheel \
-#jdk
-        openjdk-8-jdk maven gradle \
-        cron wamerican wajig \
-        proxychains wget git-lfs \
-        highlight \
-    && pip3 install --no-cache-dir \
-    	mypy pylint yapf pytest ipython \ 
-    	loguru pysnooper \
-    	findspark \
-		pyspark-stubs \
-		plotly \
-		cufflinks \
-		click \
-		tqdm \
-		pyarrow \
-		fastparquet \
-		rainbow_logging_handler \
-	    numpy scipy pandas pyarrow>=0.14.0 dask[complete] \
-	    scikit-learn xgboost \
-	    matplotlib bokeh holoviews[recommended] hvplot \
-	    tabulate \
-	    JPype1==0.6.3 JayDeBeApi sqlparse \
-	    requests[socks] lxml notifiers \
-	    py4j beakerx \
+RUN apt-get update -y
+
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
+# system base
+    sudo \
+    bash-completion zsh man-db highlight \
+    software-properties-common apt-transport-https wajig \
+    tzdata locales \
+    neovim git git-lfs zip \
+    rsync curl wget \
+    proxychains \
+# python
+    python3 python3-pip python3-venv \
+    python3-all-dev python3-setuptools build-essential python3-wheel \
+# develop
+    openjdk-8-jdk maven gradle \
+    cron wamerican
+
+# nodejs
+RUN apt-get install -y --no-install-recommends \
+    nodejs npm \
+&& 	npm install -g n \
+&&  n 12.13.0
+
+# python packages
+RUN pip3 install --no-cache-dir \
+# dev base
+	mypy pylint yapf pytest ipython virtualenv \ 
+# log, debug, monitor	
+	loguru rainbow_logging_handler pysnooper tqdm notifiers \
+# argument
+	click \
+# time
+	pyarrow>=0.14.0 \
+# science
+    numpy scipy pandas dask[complete] \
+    scikit-learn xgboost \
+    tensorflow-gpu \
+# db
+	JPype1==0.6.3 JayDeBeApi sqlparse requests[socks] tornado \
+# spark	
+	py4j pyspark findspark pyspark-stubs optimuspyspark\
+# file
+	fastparquet \
+# visualization	
+	matplotlib plotly cufflinks seaborn bokeh holoviews[recommended] hvplot tabulate \
 #jupyter
-    	tornado jupyter nbdime \
-#jupyterhub
-    	jupyterhub \
-#beakerx
-	&& beakerx install
-#nodejs
-    && apt-get install -y --no-install-recommends \
-        nodejs npm \
-    && npm install -g n \
-    && n 12.13.0 \
-#jupyterlab
-	&& pip3 install --no-cache-dir 
-		jupyterlab jupyter-lsp python-language-server[all] \
-		jupyterlab_latex qgrid \
-	&& jupyter labextension install @jupyterlab/latex \
-	&& jupyter labextension install @mflevine/jupyterlab_html \
-	&& jupyter labextension install jupyterlab-drawio \
-	&& jupyter labextension install jupyterlab_tensorboard \
-	&& jupyter labextension install qgrid \
-	&& jupyter labextension install @jupyterlab/github \
-	&& jupyter labextension install @lckr/jupyterlab_variableinspector \
-    && jupyter labextension install @jupyter-widgets/jupyterlab-manager \
-    && jupyter labextension install beakerx-jupyterlab \
-    && jupyter labextension install @jupyterlab/toc \
-    && jupyter labextension install jupyterlab-favorites \
-    && jupyter labextension install jupyterlab-recents \
-    && jupyter labextension install @krassowski/jupyterlab-lsp \
-    && jupyter labextension install @pyviz/jupyterlab_pyviz \
-    && npm install -g configurable-http-proxy \
-    && npm cache clean --force
-    && apt-get autoremove -y \
-    && apt-get clean -y
+	jupyter nbdime beakerx qgrid \
+	jupyterhub \
+	jupyterlab jupyter-lsp python-language-server[all] jupyterlab_latex 
+
+# beakerx
+RUN beakerx install
+
+# proxy
+RUN npm install -g configurable-http-proxy
+
+# jupyterlab extension
+RUN jupyter labextension install @jupyterlab/latex \
+&& 	jupyter labextension install @mflevine/jupyterlab_html \
+&& 	jupyter labextension install jupyterlab-drawio \
+&& 	jupyter labextension install jupyterlab_tensorboard \
+&& 	jupyter labextension install qgrid \
+&& 	jupyter labextension install @jupyterlab/github \
+&& 	jupyter labextension install @lckr/jupyterlab_variableinspector \
+&& 	jupyter labextension install @jupyter-widgets/jupyterlab-manager \
+&& 	jupyter labextension install beakerx-jupyterlab \
+&& 	jupyter labextension install @jupyterlab/toc \
+&& 	jupyter labextension install jupyterlab-favorites \
+&& 	jupyter labextension install jupyterlab-recents \
+&& 	jupyter labextension install @krassowski/jupyterlab-lsp \
+&& 	jupyter labextension install @pyviz/jupyterlab_pyviz
 
 
-# timezone
+    
+RUN npm cache clean --force
+RUN apt-get autoremove -y
+RUN apt-get clean -y
+
+# set timezone
 ARG TZ=America/Los_Angeles
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
-    && echo $TZ > /etc/timezone
+&&  echo $TZ > /etc/timezone
 
-# locale
+# set locale
 RUN locale-gen en_US.UTF-8
 ENV LANG=en_US.UTF-8 LANGUAGE=en_US:en LC_ALL=en_US.UTF-8  
 
 # create /workdir
-RUN mkdir -p /workdir && chmod 777 /workdir
+RUN mkdir -p /workdir 
+&& 	chmod 777 /workdir
 
 EXPOSE 8888
 EXPOSE 8787
 EXPOSE 8000
 EXPOSE 5006
 
+# copy files
 COPY scripts /scripts
 COPY settings /settings
 COPY settings/proxychains.conf /etc/proxychains.conf
 ADD settings/jupyter_notebook_config.py /etc/jupyter/
 ADD settings/jupyterhub_config.py /etc/jupyterhub/
+
+# set environment
 ENV M2_HOME=/usr/share/maven
 ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 ENV PATH=$PATH:$JAVA_HOME/bin
