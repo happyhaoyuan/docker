@@ -24,10 +24,58 @@ RUN apt-get install -y --no-install-recommends \
 && 	npm install -g n \
 &&  n 12.13.0
 
+# hadoop
+ARG HADOOP_VERSION=2.7.7
+ARG HADOOP_BINARY_ARCHIVE_NAME=hadoop-${HADOOP_VERSION}
+ARG HADOOP_BINARY_DOWNLOAD_URL=http://apache.claz.org/hadoop/common/hadoop-${HADOOP_VERSION}/${HADOOP_BINARY_ARCHIVE_NAME}.tar.gz
+RUN curl ${HADOOP_BINARY_DOWNLOAD_URL} -o /tmp/${HADOOP_BINARY_ARCHIVE_NAME}.tar.gz
+&&	tar -zxvf /tmp/${HADOOP_BINARY_ARCHIVE_NAME}.tar.gz -C /usr/local/
+&& 	ln -svf /usr/local/${SPARK_BINARY_ARCHIVE_NAME} /usr/local/spark
+&&	rm /tmp/${SPARK_BINARY_ARCHIVE_NAME}.tgz
+
+export HADOOP_HOME=/home/hduser/hadoop-2.8.2
+export HADOOP_INSTALL=$HADOOP_HOME
+export HADOOP_MAPRED_HOME=$HADOOP_HOME
+export HADOOP_COMMON_HOME=$HADOOP_HOME
+export HADOOP_HDFS_HOME=$HADOOP_HOME
+export YARN_HOME=$HADOOP_HOME
+export HADOOP_COMMON_LIB_NATIVE_DIR=$HADOOP_HOME/lib/native
+export PATH=$PATH:$HADOOP_HOME/sbin:$HADOOP_HOME/bin
+
+export HADOOP_HOME=/home/hadoop/hadoop-2.8.5
+export HADOOP_INSTALL=$HADOOP_HOME
+export HADOOP_MAPRED_HOME=$HADOOP_HOME
+export HADOOP_COMMON_HOME=$HADOOP_HOME
+export HADOOP_HDFS_HOME=$HADOOP_HOME
+export YARN_HOME=$HADOOP_HOME
+export HADOOP_COMMON_LIB_NATIVE_DIR=$HADOOP_HOME/lib/native
+export PATH=$PATH:$HADOOP_HOME/sbin:$HADOOP_HOME/bin
+export HADOOP_OPTS="-Djava.library.path=$HADOOP_HOME/lib/native"
+
+# spark
+ARG SPARK_VERSION=2.4.4
+ARG HADOOP_MAIN_VERSION=2.7
+ARG SPARK_BINARY_ARCHIVE_NAME=spark-${SPARK_VERSION}-bin-hadoop${HADOOP_MAIN_VERSION}
+ARG SPARK_BINARY_DOWNLOAD_URL=http://apache.claz.org/spark/spark-${SPARK_VERSION}/${SPARK_BINARY_ARCHIVE_NAME}.tgz
+RUN curl ${SPARK_BINARY_DOWNLOAD_URL} -o /tmp/${SPARK_BINARY_ARCHIVE_NAME}.tgz
+&&	tar -zxvf /tmp/${SPARK_BINARY_ARCHIVE_NAME}.tgz -C /usr/local/
+&& 	ln -svf /usr/local/${SPARK_BINARY_ARCHIVE_NAME} /usr/local/spark
+&&	rm /tmp/${SPARK_BINARY_ARCHIVE_NAME}.tgz
+ENV SPARK_HOME /usr/local/spark
+ENV PATH $SPARK_HOME/bin:$SPARK_HOME/sbin:$PATH
+
+
+
+ENV HADOOP_HOME /apache/hadoop
+ENV HADOOP_CONF_DIR /apache/hadoop/etc/hadoop
+ENV LD_LIBRARY_PATH /apache/hadoop/lib/native:/apache/hadoop/lib/native/Linux-amd64-64/lib
+ENV SPARK_DIST_CLASSPATH $(hadoop --config /apache/hadoop/conf classpath):/apache/hive/conf
+
+
 # python packages
 RUN pip3 install --no-cache-dir \
 # dev base
-	mypy pylint yapf pytest ipython virtualenv \ 
+	mypy pylint yapf pytest ipython virtualenv flake8 \ 
 # log, debug, monitor	
 	loguru rainbow_logging_handler pysnooper tqdm notifiers \
 # argument
@@ -37,11 +85,11 @@ RUN pip3 install --no-cache-dir \
 # science
     numpy scipy pandas dask[complete] \
     scikit-learn xgboost \
-    tensorflow-gpu \
+    tensorflow-gpu torch torchvision \
 # db
 	JPype1==0.6.3 JayDeBeApi sqlparse requests[socks] tornado \
 # spark	
-	py4j pyspark findspark pyspark-stubs optimuspyspark\
+	py4j pyspark findspark pyspark-stubs optimuspyspark toree \
 # file
 	fastparquet \
 # visualization	
@@ -72,8 +120,6 @@ RUN jupyter labextension install @jupyterlab/latex \
 && 	jupyter labextension install jupyterlab-recents \
 && 	jupyter labextension install @krassowski/jupyterlab-lsp \
 && 	jupyter labextension install @pyviz/jupyterlab_pyviz
-
-
     
 RUN npm cache clean --force
 RUN apt-get autoremove -y
@@ -139,6 +185,22 @@ RUN apt-get update \
     && wget https://download2.rstudio.org/server/bionic/amd64/rstudio-server-${rstudio_version_sub}-amd64.deb -O /rstudio-server.deb \
     && apt-get install -y --no-install-recommends /rstudio-server.deb \
     && rm /rstudio-server.deb 
+
+RUN DEBIAN_FRONTEND=noninteractive \
+   apt-get install -y --no-install-recommends r-base r-base-dev r-recommended \
+    && rm -rf /tmp/downloaded_packages/ /tmp/*.rds \
+   && rm -rf /var/lib/apt/lists/*
+# R and packages
+RUN sh -c 'echo "deb http://cran.rstudio.com/bin/linux/ubuntu xenial/" >> /etc/apt/sources.list'
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
+RUN apt-get update
+RUN apt-get install cron
+RUN apt-get install -y r-base-dev
+RUN R -e "install.packages(c('spData','argparse', 'rjson', 'stringr', 'xgboost'), repos = 'http://cran.us.r-project.org')"
+RUN R -e "install.packages(c('bit64', 'data.table', 'dplyr', 'classInt'), repos = 'http://cran.us.r-project.org')"
+RUN R -e "install.packages('spDataLarge', repos = 'https://nowosad.github.io/drat/', type='source')"
+
+
 
 EXPOSE 8787
 
