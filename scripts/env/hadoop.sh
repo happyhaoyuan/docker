@@ -40,3 +40,5 @@ chmod 0600 ~/.ssh/authorized_keys
 hdfs namenode -format -force
 
 # start-dfs.sh &&./start-yarn.sh
+# hdfs dfs -mkdir /user
+# hdfs dfs -mkdir /user/haozou
