@@ -28,3 +28,36 @@ docker run \
 /workdir: working directory
 /home_host:  
 -->
+
+
+[nbdime](https://github.com/jupyter/nbdime): Jupyter diff and merge
+
+[qgrid](https://github.com/quantopian/qgrid): Dataframe explorer
+
+[beakerx](https://github.com/twosigma/beakerx): Collection of JVM kernels and interactive widgets for plotting, tables, autotranslation, and other extensions
+
+[jupyterlab-latex](https://github.com/jupyterlab/jupyterlab-latex): Latex live-editor
+
+[jupyterlab_html](https://github.com/mflevine/jupyterlab_html): HTML viewer
+
+[jupyterlab-drawio](https://github.com/QuantStack/jupyterlab-drawio): Drawio
+
+[jupyterlab_tensorboard](jupyterlab_tensorboard): TensorBoard
+
+[jupyterlab-github](https://github.com/jupyterlab/jupyterlab-github): Github
+
+[jupyterlab-variableInspector](https://github.com/lckr/jupyterlab-variableInspector): Variable Inspector
+
+[jupyter-widgets](https://github.com/jupyter-widgets/ipywidgets/blob/master/docs/source/user_install.md): [Interactive Widgets](https://github.com/jupyter-widgets/ipywidgets/blob/master/docs/source/examples/Index.ipynb)
+
+[jupyterlab-toc](https://github.com/jupyterlab/jupyterlab-toc): Table of contents
+
+[jupyterlab-favorites](https://github.com/tslaton/jupyterlab-favorites): Favorite folders for quicker browsing
+
+[jupyterlab-recents](https://github.com/tslaton/jupyterlab-recents): Track recent files and folders
+
+[jupyterlab-lsp](https://github.com/krassowski/jupyterlab-lsp): Language server protocol
+
+[jupyterlab_pyviz](https://github.com/holoviz/pyviz_comms)
+
+

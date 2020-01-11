@@ -1,43 +1,68 @@
 FROM ubuntu:19.04
 
+ENV TERM xterm
+RUN echo "[$(tput setaf 6)INFO$(tput sgr0)] Start to build docker"
+
 RUN apt-get update -y
 
+# base
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
-# system base
-    sudo bash-completion zsh man-db highlight software-properties-common apt-transport-https wajig \
-    tzdata locales neovim git git-lfs zip rsync curl wget proxychains openssh-server \
-# python
-    python3 python3-pip python3-venv python3-all-dev python3-setuptools build-essential python3-wheel \
-# R
-    r-base r-base-dev r-cran-rjava r-recommended \
-# develop
-    openjdk-8-jdk maven gradle cron wamerican
+    sudo bash-completion zsh man-db highlight zip rsync tzdata locales software-properties-common
+RUN echo "[$(tput setaf 6)INFO$(tput sgr0)] Base finished!"
 
 # nodejs
 RUN apt-get install -y --no-install-recommends \
     nodejs npm \
-&& 	npm install -g n \
-&&  n 12.13.0
+&&  npm install -g n
+#&&  n 12.13.0
+RUN echo "[$(tput setaf 6)INFO$(tput sgr0)] Nodejs finished!"
+
+# utils
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    neovim git git-lfs wajig curl wget proxychains openssh-server apt-transport-https
+RUN npm install -g configurable-http-proxy
+RUN echo "[$(tput setaf 6)INFO$(tput sgr0)] Utils finished!"
+
+# python
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    python3 python3-pip python3-venv python3-all-dev python3-setuptools build-essential python3-wheel
+RUN echo "[$(tput setaf 6)INFO$(tput sgr0)] Py finished!"
+
+# R
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    r-base r-base-dev r-cran-rjava r-recommended
+RUN echo "[$(tput setaf 6)INFO$(tput sgr0)] R finished!"
+
+# develop
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    openjdk-8-jdk maven gradle cron wamerican
+RUN echo "[$(tput setaf 6)INFO$(tput sgr0)] Dev finished!"
+
+RUN echo "[$(tput setaf 6)INFO$(tput sgr0)] System base finished"
 
 # hadoop
 ENV HADOOP_VERSION=2.7.7
 ENV HADOOP_BINARY_ARCHIVE_NAME=hadoop-${HADOOP_VERSION}
 ENV HADOOP_BINARY_DOWNLOAD_URL=http://apache.claz.org/hadoop/common/hadoop-${HADOOP_VERSION}/${HADOOP_BINARY_ARCHIVE_NAME}.tar.gz
 ENV HADOOP_INSTALL_DIR=/opt
-RUN curl ${HADOOP_BINARY_DOWNLOAD_URL} -o /tmp/${HADOOP_BINARY_ARCHIVE_NAME}.tar.gz
-&&  tar -zxvf /tmp/${HADOOP_BINARY_ARCHIVE_NAME}.tar.gz -C ${HADOOP_INSTALL_DIR}
-&&  ln -svf ${HADOOP_INSTALL_DIR}/${HADOOP_BINARY_ARCHIVE_NAME} ${HADOOP_INSTALL_DIR}/hadoop
+RUN curl ${HADOOP_BINARY_DOWNLOAD_URL} -o /tmp/${HADOOP_BINARY_ARCHIVE_NAME}.tar.gz \
+&&  tar -zxvf /tmp/${HADOOP_BINARY_ARCHIVE_NAME}.tar.gz -C ${HADOOP_INSTALL_DIR} \
+&&  ln -svf ${HADOOP_INSTALL_DIR}/${HADOOP_BINARY_ARCHIVE_NAME} ${HADOOP_INSTALL_DIR}/hadoop \
 &&  rm /tmp/${HADOOP_BINARY_ARCHIVE_NAME}.tar.gz
+
+RUN echo "[$(tput setaf 6)INFO$(tput sgr0)] Hadoop finished"
 
 # spark
 ENV SPARK_VERSION=2.4.4
 ENV HADOOP_MAIN_VERSION=2.7
 ENV SPARK_BINARY_ARCHIVE_NAME=spark-${SPARK_VERSION}-bin-hadoop${HADOOP_MAIN_VERSION}
 ENV SPARK_BINARY_DOWNLOAD_URL=http://apache.claz.org/spark/spark-${SPARK_VERSION}/${SPARK_BINARY_ARCHIVE_NAME}.tgz
-RUN curl ${SPARK_BINARY_DOWNLOAD_URL} -o /tmp/${SPARK_BINARY_ARCHIVE_NAME}.tgz
-&&  tar -zxvf /tmp/${SPARK_BINARY_ARCHIVE_NAME}.tgz -C /opt/
-&&  ln -svf /opt/${SPARK_BINARY_ARCHIVE_NAME} /opt/spark
+RUN curl ${SPARK_BINARY_DOWNLOAD_URL} -o /tmp/${SPARK_BINARY_ARCHIVE_NAME}.tgz \
+&&  tar -zxvf /tmp/${SPARK_BINARY_ARCHIVE_NAME}.tgz -C /opt/ \
+&&  ln -svf /opt/${SPARK_BINARY_ARCHIVE_NAME} /opt/spark \
 &&  rm /tmp/${SPARK_BINARY_ARCHIVE_NAME}.tgz
+
+RUN echo "[$(tput setaf 6)INFO$(tput sgr0)] Spark finished"
 
 # R studio
 RUN rstudio_version=$(wget --no-check-certificate -qO- https://s3.amazonaws.com/rstudio-server/current.ver) \
@@ -45,6 +70,8 @@ RUN rstudio_version=$(wget --no-check-certificate -qO- https://s3.amazonaws.com/
 && wget https://download2.rstudio.org/server/bionic/amd64/rstudio-server-${rstudio_version_sub}-amd64.deb -O /rstudio-server.deb \
 && apt-get install -y --no-install-recommends /rstudio-server.deb \
 && rm /rstudio-server.deb 
+
+RUN echo "[$(tput setaf 6)INFO$(tput sgr0)] R studio finished"
 
 # set timezone
 ARG TZ=America/Los_Angeles
@@ -60,54 +87,62 @@ ENV M2_HOME=/usr/share/maven
 ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 ENV PATH=$PATH:$JAVA_HOME/bin
 
+RUN echo "[$(tput setaf 6)INFO$(tput sgr0)] Setting finished"
+
 # packages and tools
-RUN pip3 install --no-cache-dir \
+#--no-cache-dir \
 # jupyter
-    jupyter nbdime beakerx qgrid \
-    jupyterhub \
-    jupyterlab jupyter-lsp python-language-server[all] jupyterlab_latex 
+RUN pip3 install jupyter nbdime beakerx qgrid jupyterhub jupyterlab jupyter-lsp python-language-server[all] jupyterlab_latex
 # dev base
-    mypy pylint yapf pytest ipython virtualenv flake8 lxml \ 
+RUN pip3 install mypy pylint yapf pytest ipython virtualenv flake8 lxml
 # log, debug, monitor   
-    loguru rainbow_logging_handler pysnooper tqdm notifiers \
+RUN pip3 install loguru rainbow_logging_handler pysnooper tqdm notifiers
 # argument
-    click \
+RUN pip3 install click
 # time
-    pyarrow>=0.14.0 \
+RUN pip3 install pyarrow>=0.14.0
 # science
-    numpy scipy pandas dask[complete] \
-    scikit-learn xgboost \
-    tensorflow-gpu torch torchvision \
+RUN pip3 install numpy scipy pandas dask[complete] scikit-learn xgboost
+RUN pip3 install tensorflow
+#RUN pip3 install tensorflow-gpu
+#RUN pip3 install torch torchvision
 # db
-    JPype1==0.6.3 JayDeBeApi sqlparse requests[socks] tornado \
+RUN pip3 install JPype1==0.6.3 JayDeBeApi sqlparse requests[socks] tornado influxdb
 # spark 
-    py4j pyspark findspark pyspark-stubs optimuspyspark toree \
+RUN pip3 install pyspark py4j findspark pyspark-stubs optimuspyspark toree
 # file
-    fastparquet \
+RUN pip3 install fastparquet
 # visualization 
-    matplotlib plotly cufflinks seaborn bokeh holoviews[recommended] hvplot tabulate \
+RUN pip3 install matplotlib plotly cufflinks seaborn bokeh holoviews[recommended] hvplot tabulate colorlover
+# other
+RUN pip3 install ipykernel pytz pyyaml
+
+RUN echo "[$(tput setaf 6)INFO$(tput sgr0)] Pip finished"
 
 # beakerx
 RUN beakerx install
 
-# proxy
-RUN npm install -g configurable-http-proxy
-
 # jupyterlab extension
-RUN jupyter labextension install @jupyterlab/latex \
-&&  jupyter labextension install @mflevine/jupyterlab_html \
-&&  jupyter labextension install jupyterlab-drawio \
-&&  jupyter labextension install jupyterlab_tensorboard \
-&&  jupyter labextension install qgrid \
-&&  jupyter labextension install @jupyterlab/github \
-&&  jupyter labextension install @lckr/jupyterlab_variableinspector \
-&&  jupyter labextension install @jupyter-widgets/jupyterlab-manager \
-&&  jupyter labextension install beakerx-jupyterlab \
-&&  jupyter labextension install @jupyterlab/toc \
-&&  jupyter labextension install jupyterlab-favorites \
-&&  jupyter labextension install jupyterlab-recents \
-&&  jupyter labextension install @krassowski/jupyterlab-lsp \
-&&  jupyter labextension install @pyviz/jupyterlab_pyviz
+RUN jupyter labextension install @jupyterlab/latex
+RUN jupyter labextension install @mflevine/jupyterlab_html
+RUN jupyter labextension install jupyterlab-drawio
+RUN jupyter labextension install jupyterlab_tensorboard
+RUN jupyter labextension install @jupyterlab/github
+RUN jupyter labextension install @lckr/jupyterlab_variableinspector
+RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager
+RUN jupyter labextension install @jupyterlab/toc
+
+# update node
+RUN n latest 
+
+RUN jupyter labextension install jupyterlab-favorites
+#RUN jupyter labextension install qgrid
+#RUN jupyter labextension install beakerx-jupyterlab
+RUN jupyter labextension install jupyterlab-recents
+RUN jupyter labextension install @krassowski/jupyterlab-lsp
+#RUN jupyter labextension install @pyviz/jupyterlab_pyviz
+
+RUN echo "[$(tput setaf 6)INFO$(tput sgr0)] Jupyter finished"
 
 # clean
 RUN npm cache clean --force
@@ -115,8 +150,10 @@ RUN apt-get autoremove -y
 RUN apt-get clean -y
 # RUN rm -rf /tmp/downloaded_packages/ /tmp/*.rds /var/lib/apt/lists/*
 
+RUN echo "[$(tput setaf 6)INFO$(tput sgr0)] Cleaning finished"
+
 # create directory
-RUN mkdir -p /workdir /logs
+RUN mkdir -p /workdir /logs \
 &&  chmod 777 /workdir /logs
 
 # copy files
@@ -136,3 +173,5 @@ EXPOSE 9870
 EXPOSE 8088
 # spare
 EXPOSE 5006
+
+RUN echo "[$(tput setaf 6)INFO$(tput sgr0)] All finished"

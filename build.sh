@@ -91,7 +91,7 @@ echo "[$(tput setaf 6)INFO$(tput sgr0)] Building target $(tput setaf 4)${TARGET}
 with docker file $(tput setaf 4)${FILE}$(tput sgr0) and \
 context $(tput setaf 4)${CONTEXT}$(tput sgr0) now"
 echo "[$(tput setaf 3)CMD$(tput sgr0)] $cmd"
-# eval $cmd
+eval $cmd
 echo "[$(tput setaf 2)DONE$(tput sgr0)] Docker build finished!"
 fi
 
@@ -100,6 +100,6 @@ then
     cmd="docker push ${TARGET}"
     echo "[$(tput setaf 6)INFO$(tput sgr0)] Pushing taregt $(tput setaf 4)${TARGET}$(tput sgr0) now"
     echo "[$(tput setaf 3)CMD$(tput sgr0)] $cmd"
-    # eval $cmd
+    eval $cmd
     echo "[$(tput setaf 2)DONE$(tput sgr0)] Docker push finished!"
 fi
