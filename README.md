@@ -21,14 +21,7 @@ docker run \
     -e DOCKER_ADMIN_USER=`id -un` \
     -v $(pwd):/workdir \
     -v $(dirname $HOME):/home_host \
-    9434/zac:latest
-
-
-<!--     
-/workdir: working directory
-/home_host:  
--->
-
+    9434/zac:latest /scripts/sys/init.sh
 
 [nbdime](https://github.com/jupyter/nbdime): Jupyter diff and merge
 
