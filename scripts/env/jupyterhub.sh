@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+mkdir -p /etc/jupyterhub
 cp /settings/jupyterhub_config.py /etc/jupyterhub/
 
 # add admin user to JupyterHub

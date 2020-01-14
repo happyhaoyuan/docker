@@ -20,8 +20,8 @@ source /scripts/env/hadoop.sh
 echo "[$(tput setaf 6)INFO$(tput sgr0)] $(tput setaf 4)Hadoop$(tput sgr0) settled"
 source /scripts/env/spark.sh
 echo "[$(tput setaf 6)INFO$(tput sgr0)] $(tput setaf 4)Spark$(tput sgr0) settled"
-source /scripts/env/jupyterlab.sh
-echo "[$(tput setaf 6)INFO$(tput sgr0)] $(tput setaf 4)Jupyterlab$(tput sgr0) settled"
+source /scripts/env/jupyterhub.sh
+echo "[$(tput setaf 6)INFO$(tput sgr0)] $(tput setaf 4)Jupyterhub$(tput sgr0) settled"
 source /scripts/env/R.sh
 echo "[$(tput setaf 6)INFO$(tput sgr0)] $(tput setaf 4)R$(tput sgr0) settled"
 
